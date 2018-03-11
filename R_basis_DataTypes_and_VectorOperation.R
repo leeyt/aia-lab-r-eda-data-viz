@@ -150,5 +150,33 @@ mtcars[c(2,3,4), c("mpg","cyl")] # 顯示指定列欄的交集
 
 ### END  ==== 
 
+# 練習題
+
+## 1. 在向量 (1,4,2,NA,7,20,NA,15,10,5) 中，以中位數填補 NA
+
+a.list <- c(1,4,2,NA,7,20,NA,15,10,5)
+a.list[which(is.na(a.list))] <- median(a.list, na.rm=TRUE)
+
+## 2. 抓取 http://goo.gl/ByTnpD 上的資料後，請檢查所有欄位的資料型態
+
+movies <- read.csv("https://goo.gl/ByTnpD", sep="|", stringsAsFactors=FALSE)
+sapply(movies, typeof)
+
+## 3. 將金額的欄位 (box=票房) 轉換成數值型態，並分別計算票房前 10 名與後 10 名的金額總和
+
+movies$box.usd <- as.numeric(gsub(x=movies$box, pattern="\\$", replacement=""))
+movies <- movies[order(movies$box.usd, decreasing=TRUE),]
+sum(head(movies$box.usd, n=10))
+sum(tail(movies$box.usd, n=10))
+
+## 4. 建立一個新欄位 "year.pass" 記錄自上映至今過了幾年，再計算年平均票房，列出年平均票房最高的前 5 名電影
+
+movies$year <- as.numeric(sapply(movies$date, function(date) strsplit(date, split=",")[[1]][2]))
+this.year <- 2018
+movies$year.pass <- 2018 - movies$year
+movies$avg.year.box <- movies$box.usd / movies$year.pass
+movies <- movies[order(movies$avg.year.box, decreasing=TRUE),]
+head(movies[c("name", "avg.year.box")], n=5)
+
 rm(list = ls()) # clear all variables
 
