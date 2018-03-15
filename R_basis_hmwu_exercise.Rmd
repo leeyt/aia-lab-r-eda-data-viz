@@ -1,0 +1,282 @@
+> R 語言探索性資料分析與資料視覺化   
+> 其他常用功能 (Other Common Functions)
+
+# 吳漢銘老師的練習題
+
+## 1.5 (a) 
+
+用 rep 指令造出以下數列：1 1 1 1 1 2 2 2 2 3 3 3 4 4 5
+
+```{r}
+rep(c(1,2,3,4,5), times=c(5,4,3,2,1))
+```
+
+## 1.5 (b) 
+
+用 rev 和 sequence 指令造出以下數列：1 2 3 4 5 6 2 3 4 5 6 3 4 5 6 4 5 6 5 6 6
+
+```{r}
+result <- c()
+for (i in rev(1:6)) {
+  result <- c(result, sequence(i)+(6-i))
+}
+print(result)
+```
+
+## 1.6 (a) 
+
+用 rep 指令造出以下數列: "A" "A" "A" "A" "A" "B" "B" "B" "B" "C" "C" "C" "D" "D" "E"
+
+```{r}
+rep(c("A","B","C","D","E"), c(5,4,3,2,1))
+```
+
+## 1.6 (b)
+
+用 seq, c 指令造出以下數列: "b" "d" "f" "h" "j" "l" "n" "p" "r" "t" "v" "x" "z" "a" "c" "e" "g" "i" "k" "m" "o" "q" "s" "u" "w" "y"
+
+```{r}
+c(letters[seq(from=2, to=26, by=2)], letters[seq(from=1, to=26, by=2)])
+```
+
+## 1.12 
+
+某班學生有一考試成績和性別紀錄如下 (資料是依照學生座號 1、2、· · · 依序紀錄; NA 代表缺考):
+
+成績: 30, 49, 95, NA, 54, NA, 61, 85, 51, 22, 0, 0
+性別: m, f, f, m, f, m, f, m, m, f, f, m
+
+```{r}
+grade <- c(30, 49, 95, NA, 54, NA, 61, 85, 51, 22, 0, 0)
+sex <- c('m', 'f', 'f', 'm', 'f', 'm', 'f', 'm', 'm', 'f', 'f', 'm')
+
+df <- data.frame(grade, sex)
+head(df)
+```
+
+(a) 本班共有多少學生? 男女生各多少人?
+
+```{r}
+length(df$grade)
+length(which(df$sex == 'm'))
+length(which(df$sex == 'f'))
+```
+
+(b) 此科目成績最高分及最低分是幾分?
+
+```{r}
+max(df$grade, na.rm=TRUE)
+min(df$grade, na.rm=TRUE)
+```
+
+(c) 計算此科目成績平均及標準差。男女生成績平均各是多少?
+
+```{r}
+mean(df$grade, na.rm=TRUE)
+sd(df$grade, na.rm=TRUE)
+
+mean(df[df$sex == 'm', 'grade'], na.rm=TRUE)
+mean(df[df$sex == 'f', 'grade'], na.rm=TRUE)
+```
+
+(d) 老師欲將成績依序做以下調整: 
+     (i) 缺考以 0 分計;
+     (ii) 每人加 10 分 (缺考者不加分，超過 100 分以 100 分計)。
+     印出調整後的分數。
+
+```{r}
+df$grade <- df$grade + 10
+df$grade[which(df$grade > 100)] <- 100
+df$grade[which(is.na(df$grade))] <- 0
+
+print(df$grade)
+```
+
+(e) 以調整後的分數計, 列出及格 (60 分以上，含) 同學的座號。共有幾位?
+
+```{r}
+seat.pass <- which(df$grade >= 60)
+print(seat.pass)
+length(seat.pass)
+```
+
+## 2.5
+
+利用 for，試計算 (1 × 2 × · · · × 1000000) 之結果所需要的電腦系統時間。
+
+```{r}
+start.time <- proc.time()
+product <- 1
+for (i in 2:1000000) {
+  product <- product * i
+}
+stop.time <- proc.time()
+time.loop <- stop.time - start.time
+
+print(time.loop)
+```
+
+## 2.10
+
+小銘老師有某班學生之期中考試及加分考試兩筆資料
+
+```{r}
+midterm <- sample(1:100, 50, replace = TRUE)
+extra <- sample(1:100, 50, replace = TRUE)
+```
+
+成績比例為期中考佔 40%，加分考佔 60%。
+結算成績 (100%) 若小於期中考成績，則最後結算成績以期中考計。
+試寫一函式，處理上述計算，並回傳 
+   (1) 最後結算成績之平均數及變異數，及
+   (2) 最後被當之學生比例。
+
+```{r}
+final.grades <- function(midterm, extra) {
+  df <- data.frame(midterm, extra)
+  df$grade <- 0.4 * df$midterm + 0.6 * df$extra
+  df$grade <- ifelse(df$grade < df$midterm, df$midterm, df$grade)
+  
+  grade.avg <- mean(df$grade)
+  grade.sd  <- sd(df$grade)
+  fail.ratio <- length(which(df$grade < 60.0)) / length(df$grade)
+  
+  return(c(grade.avg, grade.sd, fail.ratio))
+}
+
+print(final.grades(midterm, extra))
+```
+
+## 2.11
+
+某班學生 (student.id) 期中考微積分及線代的成績資料如下:
+
+```{r}
+student.id <- paste("student", 1:50, sep=".")
+Calculus <- round(rnorm(length(student.id), mean=65, sd=10), digits=0)
+LinearAlgebra <- sample(1:100, size=length(student.id), replace=TRUE)
+```
+
+老師註解成績的方法如下:
+
+   i. 兩科成績皆高於 85 以上 (含)，記為「佳 (Good)」。
+   ii. 任一科成績低於 40 以下 (含)，記為「要加強 (Warn)」。
+   iii. 兩科成績皆低於 40 以下 (含)，記為「危險 (Danger)」。
+
+(a) 利用 for 寫一函式，計算「佳」「要加強」「危險」各有多少位同學。
+(b) 同一函式裡，再印出「佳」及「危險」之學生座號 (id)。
+
+```{r}
+df <- data.frame(Calculus, LinearAlgebra, row.names=student.id)
+df[df$Calculus >= 85 & df$LinearAlgebra >= 85, "remark"] <- "Good"
+df[df$Calculus <= 40 | df$LinearAlgebra <= 40, "remark"] <- "Warn"
+df[df$Calculus <= 40 & df$LinearAlgebra <= 40, "remark"] <- "Danger"
+
+summarize.grades <- function(df) {
+  print(paste("Good:", length(which(df$remark == "Good"))))
+  print(paste("Warn:", length(which(df$remark == "Warn"))))
+  print(paste("Danger:", length(which(df$remark == "Danger"))))
+  
+  print(rownames(df[which(df$remark == "Good"),]))
+  print(rownames(df[which(df$remark == "Warn"),]))
+  print(rownames(df[which(df$remark == "Danger"),]))
+}
+summarize.grades(df)
+```
+
+## 2.21
+
+某樂透 (Lottery) 遊戲規則如下: 
+
+「消費者從 01∼49 中任選 6 個號碼進行投注。開獎時，開獎單位將隨機開出 6 個號碼 (winning number)。
+如果消費者選號有三個以上(含三個號碼)對中當期開出之 6 個號碼，即為中獎，並可依規定兌領獎金。」 
+
+某天小明買了兩注電腦選號，其號碼為 (5, 29, 12, 10, 38, 35) 和 (41, 13, 21, 29, 19, 12)，
+若當期之開獎號碼為 (10, 7, 12, 38, 47, 35)，請寫一 R 函式，幫小明對獎。
+
+程式要求如下: 
+        
+(1) 輸入為開獎號碼 (預設值為本題之開獎號碼); 
+(2) 執行對獎程式後，由營幕輸入「消費者投注號碼」;
+(3) 輸出為消費者投注號碼及開獎號碼、對中之號碼個數、恭喜中獎或銘謝惠顧;
+(4) 不可用 for。
+
+提示: 
+
+(1) %*%; 
+(2) 由營幕輸入「消費者投注號碼」，可一次輸入兩注，或一次輸入一注，但執行兩次對獎程式)
+
+## 2.24
+
+某國發行了 1，5，10，50，100 不同面額的鈔票，若有人要從銀行領出 N 元，銀行行員要如何發給鈔票，使用的張數會最少?
+
+(例) 輸入: 478
+     輸出: 1 元 3 張，5 元 1 張，10 元 2 張，50 元 1 張，100 元 4 張，共 478 元。
+
+## 2.28
+
+USArrests 資料中，選出以"N" 開頭的州，計算選出資料每個變數的平均值及標準差。
+
+## 2.30 (a)
+
+資料壓縮: 將字串"AAABBBCCCC" 表示成"3A3B4C"。 (提示: gregexpr, cat。) 
+
+## 2.30 (b)
+
+資料解壓縮: 將字串"3A3B4C" 表示"AAABBBCCCC"。 (提示: substr, cat, rep)
+
+## 2.41
+
+有一班學生之座號 (ID) 及性別 (student.gender) 的資訊如下。
+
+某日小考兩科: 微積分 (score.calculus) 及英文 sd(score.english)，成績如下，其中有三位同學缺考。
+
+```{r}
+set.seed(12345)
+ID <- paste("No.", 1:50, sep="")
+score.calculus <- sample(0:100, 50, replace=T)
+score.english <- sample(0:100, 50, replace=T)
+student.gender <- as.factor(sample(c("f", "m"), 50, replace=T))
+absence.id <- sample(1:50, 3)
+score.calculus[absence.id] <- score.english[absence.id] <-  NA
+```
+
+(a) 算出微積分平均分數及標準差。(提示: (1) 缺考不計入; (2) ?mean)
+
+```{r}
+mean(score.calculus, na.rm=T)
+sd(score.calculus, na.rm=T)
+```
+
+(b) 男生英文成績平均多少分? (提示: 缺考不計入)
+
+```{r}
+mean(score.english[which(student.gender == "m")], na.rm=T)
+```
+
+(c) 將缺考成績記為 0 分後，請問有哪些同學兩科成績同時及格? (列出座號)
+
+```{r}
+score.calculus[which(is.na(score.calculus))] <- 0
+score.english[which(is.na(score.english))] <- 0
+
+student.id[which(score.english >= 60 & score.calculus >= 60)]
+```
+
+(d) (承上小題) 兩變數 $(x, y)_{i=1}^n$ 的相關係數之公式如下:
+
+    $$ r = \frac{\sum_{i=1}^n (x_i − \bar{x})(y_i − \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}} $$
+    
+
+試計算微積分及英文兩成績之相關係數，並與 cor 之結果相比較。(提示: sqrt, sum, mean)
+    
+```{r}
+mean.calculus <- mean(score.calculus, na.rm=T)
+mean.english <- mean(score.english, na.rm=T)
+r.formula <- sum((score.calculus - mean.calculus)*(score.english - mean.english), na.rm=T) / (sqrt(sum((score.calculus - mean.calculus)^2, na.rm=T))*sqrt(sum((score.english - mean.english)^2, na.rm=2)))
+
+r.cor = cor(score.calculus, score.english, use="pairwise.complete.obs")
+
+print(paste("by formula = ", r.formula))
+print(paste("by cor =", r.cor))
+```
