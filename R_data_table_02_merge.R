@@ -31,3 +31,25 @@ merge(Employees, Departments, by = "department.id", all.y = T)
 
 # outer join
 merge(Employees, Departments, by = "department.id", all = T)
+
+'
+練習題
+'
+
+# 1. 請用 data.table 讀取店舖資料、細節檔、評論
+
+shop.infos <- fread('data/shop_infos.csv')
+head(shop.infos)
+names(shop.infos)
+
+shop.details <- fread('data/shop_details.csv')
+head(shop.details)
+names(shop.details)
+
+shop.reviews <- fread('data/shop_reviews.csv')
+head(shop.reviews)
+names(shop.reviews)
+
+# 2. 請練習將店舖基本資料和詳細資料合併
+
+shop.infos.all <- merge(shop.infos, shop.details, by="id")
