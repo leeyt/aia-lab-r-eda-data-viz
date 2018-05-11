@@ -137,3 +137,24 @@ vector.strsplit <- function(x, split, i = 1){
   sapply(x, FUN = mystrsplit, split=split, i = i)
 }
 DT[, species.split := vector.strsplit(as.character(Species), "o")]
+
+'
+練習題
+'
+
+# 1. 清除重複資料 (Hints: ?duplicated)
+
+df.allshop.info <- fread('data/shop_infos.csv')
+df.shop.details <- fread('data/shop_details.csv')
+
+df.allshop.info <- merge(df.allshop.info, df.shop.details, by='id')
+
+duplicated.rows <- duplicated(df.allshop.info, by="id")
+df.allshop.info <- df.allshop.info[!duplicated.rows,]
+
+# 2. 在資料包含的時段內，為每家店鋪新增一個欄位：所有分享文的**平均棒棒糖數**並命名為 `avg.n.lolipop` (Hints: j + by & merge)
+
+df.review.info <- fread('data/shop_reviews.csv')
+
+df.allshop.info <- merge(df.allshop.info, df.review.info[, .(avg.n.lolipop=mean(n.lolipop)), by=id], all.x=T)
+df.allshop.info[is.na(avg.n.lolipop), avg.n.lolipop := 0] # rm na
