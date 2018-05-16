@@ -321,3 +321,17 @@ m1 <- c("非常差", "很差", "差", "一般", "好", "很好", "非常好")
 df.review.info$r.delicious <- factor(df.review.info$r.delicious, 
                                      levels = m1, ordered = T)
 head(df.review.info$r.delicious)
+
+# Practice
+# 1) 請建立一個 "gov.area2" 欄位，取得地址的鄉鎮市區
+df.allshop.info[, gov.area2 := stri_extract(addr, regex = ".+?[縣市].+?[鄉鎮市區]")]
+head(df.allshop.info[, .(addr, gov.area2)])
+
+# 2) 將 df.review.info 中其他還是亂碼的欄位也轉回正常顯示
+
+# 3) 將 df.review.info 中的 r.service 轉換為有順序性的因子變數
+unique(df.review.info$r.service)
+m2 <- c("非常不滿意", "很不滿意", "不滿意", "一般", "滿意", "很滿意", "非常滿意")
+df.review.info$r.service <- factor(df.review.info$r.service,
+                                   levels = m2, ordered = T)
+head(df.review.info$r.service)
