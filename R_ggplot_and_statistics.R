@@ -240,11 +240,49 @@ ggplot(plt.tmp, aes(Var1, Var2, fill = cor)) +
   scale_fill_gradient2(low = "blue", mid = "white", high = "red")
 
 # Practice
-# 1) 請以 scatter plot 檢視店鋪的平均客單價與氣氛評價分數的關係
-# 2.a) 請對 "西式早餐" 與 "早午餐" 的美味分數做 t 檢定         
-# 2.b) 對 "中式早餐", "西式早餐" 與 "早午餐" 的美味分數做 ANOVA 並畫出 ecdf
+# 1) 請以 scatter plot 檢視店鋪的平均消費與氣氛評價分數的關係
+
+ggplot(df.allshop.info, aes(scoring.delicious + 1, avg.cost + 1)) +
+  geom_point(aes(color = cate.minor)) + 
+  scale_x_log10() + scale_y_log10() +
+  theme_bw(base_family = "BiauKai")
+
+# 2a) 請對 "西式早餐" 與 "早午餐" 的美味分數做 t 檢定
+
+t.test(df.allshop.info[cate.minor == "西式早餐",]$scoring.delicious,
+       df.allshop.info[cate.minor == "早午餐",]$scoring.delicious)
+
+# 2b) 對 "中式早餐", "西式早餐" 與 "早午餐" 的美味分數做 ANOVA 並畫出 ecdf
+summary(aov(scoring.delicious ~ cate.minor, df.allshop.info[cate.minor %in% c("中式早餐","西式早餐","早午餐")]))
+
+ggplot(df.allshop.info[cate.minor %in% c("中式早餐", "西式早餐", "早午餐")], 
+       aes(x = scoring.delicious)) +
+  stat_ecdf(aes(color = cate.minor)) +
+  theme_bw(base_family = "BiauKai")
+
 # 3) 請以迴圈的方式計算倆倆變數間的關係並畫出相關矩陣
+df.cor <- data.table()
+for (i in cor.colname) {
+  for (j in cor.colname) {
+    k <- cor.test(df.allshop.info[[i]], df.allshop.info[[j]])
+    print(paste("correlation between", i, "and", j, "is", k$estimate))
+    df.tmp <- data.table(i, j, k$estimate)
+    df.cor <- rbind(df.cor, df.tmp)
+  }
+}
+head(df.cor)
+
+ggplot(df.cor, aes(i, j, fill = V3)) + 
+  geom_tile() +
+  theme_bw(base_family = "BiauKai") +
+  geom_text(aes(label = paste0(sprintf("%.2f", round(V3,3))))) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red")
+
 # 4) 請使用在 data.table 重鑄資料的練習中創建的 scoring.long 畫出以下 ecdf 的圖
+ggplot(scoring.long, aes(value, col=cate.minor)) +
+  stat_ecdf() +
+  facet_wrap(~variable, scales = "free") +
+  theme_bw(base_family = "BiauKai")
 
 ### Other common used data preprocessing tech ====
 # So, what's next? Create more features and do more EDA! -- feature engineering
