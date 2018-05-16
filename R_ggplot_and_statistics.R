@@ -158,16 +158,19 @@ ggplot(df.allshop.info, aes(x = avg.cost)) +
   scale_color_discrete("cate.minor")
 
 ### ggplot2 section 2====
+
 # scatter plot: 觀看數與收藏數的關係
 # scatter plot: Inspect the relationship between #view and #favorite 
+
 ggplot(df.allshop.info, aes(n.view + 1, n.favorite + 1)) +
   geom_point(aes(color = cate.minor)) + 
-  scale_x_log10() + scale_y_log10()
+  scale_x_log10() + scale_y_log10() +
+  theme_bw(base_family = "BiauKai")
 # to use log, recommend you to +1 (or log(0) will become -Inf)
 
 ggplot(df.allshop.info, aes(n.favorite + 1, n.share + 1)) +
   geom_point(aes(color = cate.minor)) + 
-  theme_bw() + 
+  theme_bw(base_family = "BiauKai") + 
   scale_x_log10() + scale_y_log10() +
   stat_smooth() + 
   facet_wrap(~cate.minor)
@@ -184,8 +187,7 @@ summary(aov(scoring.atom ~ cate.minor,
 ggplot(df.allshop.info[cate.minor %in% c("中式早餐", "西式早餐", "早午餐")], 
        aes(x = scoring.atom)) +
   stat_ecdf(aes(color = cate.minor)) +
-  theme_bw()
-
+  theme_bw(base_family = "BiauKai")
 
 # tile & correlation matrix: 各變數間的相關矩陣
 # tile & correlation matrix: correlation between variables
@@ -193,7 +195,9 @@ ggplot(df.allshop.info[cate.minor %in% c("中式早餐", "西式早餐", "早午
 # to compute correlation, columns must be numeric
 cor.colname <- c("avg.cost", "n.scoring", "scoring.mix", "scoring.delicious",
                  "scoring.atom", "n.view", "n.favorite", "n.share")
-df.allshop.info[, (cor.colname) := lapply(.SD, function(x) as.numeric(as.character(x)) ), .SDcols = cor.colname]
+df.allshop.info[,
+                (cor.colname) := lapply(.SD, function(x) as.numeric(as.character(x))),
+                .SDcols = cor.colname]
 # run 1 by 1 correlation with built-in function
 with(df.allshop.info, cor.test(avg.cost, n.scoring))
 
@@ -215,7 +219,8 @@ head(plt.tmp)
 rm(plt.r, plt.p)
 
 ggplot(plt.tmp, aes(Var1, Var2, fill = cor)) + 
-  geom_tile() + theme_bw() +
+  geom_tile() +
+  theme_bw(base_family = "BiauKai") +
   geom_text(aes(label = paste0(sprintf("%.2f", round(cor,3)), 
                                "\n", 
                                sprintf("%.2f", round(sig,3))))) +
@@ -228,7 +233,8 @@ plt.tmp$p.star <- cut(plt.tmp$sig,
                       include.lowest = F, right = T)
 
 ggplot(plt.tmp, aes(Var1, Var2, fill = cor)) + 
-  geom_tile() + theme_bw() +
+  geom_tile() + 
+  theme_bw(base_family = "BiauKai") +
   geom_text(aes(label = paste0(sprintf("%.2f", round(cor,3)), 
                                p.star))) +
   scale_fill_gradient2(low = "blue", mid = "white", high = "red")
