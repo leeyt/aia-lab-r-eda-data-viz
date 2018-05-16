@@ -109,10 +109,53 @@ ggplot(df.breakfast, aes(x = cate.minor, y = mean.avg.cost)) +
 # 練習題
 # 1) 請用長條圖畫出在資料中平均消費超過 100 元的店佔資料中的多少比例？
 #    以及在各類型的早餐店中所佔的比例？
+df.allshop.info[, is.larger.100 := ifelse(avg.cost > 100, 1, 0)]
+ggplot(df.allshop.info, aes(as.factor(is.larger.100))) +
+  geom_bar(aes(y = ..count.. / sum(..count..))) +
+  xlab('平均消費超過 100 元？') +
+  ylab('所佔比例') +
+  scale_y_continuous(labels = percent, breaks = seq(0, 1, 0.1)) +
+  theme_bw(base_family = "BiauKai")
+
+is.larger.100.by.cate <- df.allshop.info[, 
+                                         .(n = .N),
+                                         .(cate.minor, is.larger.100)]
+is.larger.100.by.cate[, n.pct := n / sum(n), .(cate.minor)]
+
+ggplot(is.larger.100.by.cate, aes(x = as.factor(is.larger.100))) +
+  geom_bar(stat = 'identity', aes(y = n.pct)) +
+  xlab("平均消費超過 100 元？") +
+  ylab("所佔比例") +
+  scale_y_continuous(labels = percent, breaks = seq(0, 1, 0.2)) +
+  theme_bw(base_family = "BiauKai") +
+  facet_wrap(~cate.minor, scales = "free_y")
+
 # 2) 請畫出各類型早餐店的點閱率 ECDF (Empirical CDF)
+ggplot(df.allshop.info, aes(x = n.view)) + 
+  stat_ecdf(aes(color = factor(cate.minor)), geom = 'line') + 
+  scale_x_log10(labels = log10) +
+  theme_bw(base_family = "BiauKai") +
+  xlab("n.view (log10)") +
+  ylab("ecdf") + 
+  scale_y_continuous(labels = percent) +
+  scale_color_discrete("早餐店類型")
+
 # 3) 請畫出各類型早餐店的平均消費之中位數
+ggplot(df.breakfast, aes(cate.minor, med.avg.cost)) +
+  geom_bar(stat = "identity", fill = "blue") + 
+  theme_bw(base_family = "BiauKai")
+
 # 4) 請移除平均消費為 0 的資料後，再重新畫圖檢視各類型早餐店的平均消費
 #    與點閱數等特徵
+df.allshop.info <- df.allshop.info[avg.cost != 0, ]
+
+ggplot(df.allshop.info, aes(x = avg.cost)) +
+  stat_ecdf(aes(color = factor(cate.minor)), geom = "line") +
+  theme_bw(base_family = "BiauKai") + 
+  ylab("cumulative n") +
+  geom_hline(yintercept = 0.5, lty = 2, color = "red") +
+  scale_y_continuous(labels = percent) +
+  scale_color_discrete("cate.minor")
 
 ### ggplot2 section 2====
 # scatter plot: 觀看數與收藏數的關係
