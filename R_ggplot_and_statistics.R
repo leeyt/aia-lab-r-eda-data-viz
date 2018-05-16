@@ -306,7 +306,6 @@ df.tmp <- df.review.info[,
                            avg.useful_view = mean(n.useful/n.view)), 
                          by = "id"]
 
-
 # 評分轉換 - 先檢視大致的評分法
 # convert comments scoring to factor
 head(df.review.info[, .(r.delicious, r.service, r.atom)])
@@ -322,4 +321,3 @@ m1 <- c("非常差", "很差", "差", "一般", "好", "很好", "非常好")
 df.review.info$r.delicious <- factor(df.review.info$r.delicious, 
                                      levels = m1, ordered = T)
 head(df.review.info$r.delicious)
-
